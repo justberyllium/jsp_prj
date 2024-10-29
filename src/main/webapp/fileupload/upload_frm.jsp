@@ -39,6 +39,27 @@ function chkNull(){
 		return;
 	}//end if
 	
+	// 업로드가능 확장자는 이미지 관련 확장자만 가능하도록 유효성 검증
+	// jpg, gif, png, bmp 확장자만 업로드 가능
+	// 위에 확장자가 아니면 alert("업로드 가능 확장자가 아닙니다")를 보여주고
+	// 리턴한다
+	const blockExt=['jpg','gif', 'png','bmp'];
+	var fileName=$("#upfile").val();
+	var fileExt=fileName.substring(fileName.lastIndexOf(".")+1);
+	
+	var blockFlag=false;
+	for(var i=0; i<blockExt.length; i++){
+		if(blockExt[i] == fileExt){
+			blockFlag=true;
+			break;
+		}//end if
+	}//end for
+	
+	if( !blockFlag ){
+		alert("업로드 가능 확장자가 아닙니다")
+		return;
+	}//end if
+	
 	$("#frm").submit();
 	
 }//chkNull
@@ -47,10 +68,17 @@ function chkNull(){
 <body>
 <div id="wrap">
 <!-- 웹 파라메터 전송방식에서 file 전송방식으로 변경 -->
+<a href="file_list.jsp">파일리스트보기</a>
 <form action="upload_process.jsp" method="post" id="frm" name="frm"
 	enctype="multipart/form-data">
 <label>업로더</label>
 <input type="text" name="uploader" id="uploader" /><br>	
+<label>파일확장자</label>
+<input type="checkbox" name="ext" value="jpg" />jpg	
+<input type="checkbox" name="ext" value="png" />png	
+<input type="checkbox" name="ext" value="exe" />exe	
+<input type="checkbox" name="ext" value="hwp" />hwp	
+<br>
 <label>파일</label>
 <input type="file" name="upfile" id="upfile" /><br>	
 <input type="button" value="업로드" id="btn" class="btn btn-primary btn-sm" /><br>	
