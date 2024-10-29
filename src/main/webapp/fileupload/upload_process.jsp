@@ -39,6 +39,11 @@ web prarmeter가 정달되지 않는다
 EL : ${ param.uploader }<br> --%>
 요청방식 : <%= request.getMethod() %><br>
 <%
+//flag받기
+boolean uploadFlag=(boolean)session.getAttribute("uploadFlag");
+
+if( !uploadFlag ){
+	
 //1. 업로드된 파일의 저장 디렉토리 얻기
 File saveDir=new File("C:/dev/workspace/jsp_prj/src/main/webapp/upload");
 //2. 업로드 파일의 최대 크기 ( byte > KByte > MByte > GByte)
@@ -68,14 +73,11 @@ if(uploadFile.length() > maxSize){// 업로드 최대 크기를 초과
 	<%= originName %>은 10MByte(<%= maxSize %>byte)를 초과합니다.<br>
 	업로드 파일의 크기내의 파일로 변환하여 업로드 해주세요.<br>
 	<a href="javascript:history.back()">뒤로</a>
-	
 <%
 }else{
-	
-
-
 %>
 <h2>파일업로드 성공</h2>
+
 <div>
 업로더 : <%= uploader %><br>
 확장자 : <%
@@ -95,7 +97,6 @@ if(uploadFile.length() > maxSize){// 업로드 최대 크기를 초과
 <a href="file_list.jsp">파일리스트보기</a>
 </div>
 <%
-
 }//end else
 }catch(Exception e){//파일 크키가 클때 예외가 처리되지 않는다.
 	e.printStackTrace();
@@ -104,10 +105,9 @@ if(uploadFile.length() > maxSize){// 업로드 최대 크기를 초과
 	<% 
 }//end catch
 
+session.setAttribute("uploadFlag", true);
+}//end if
 	%>
-
-
-
 </div>
 </body>
 </html>
