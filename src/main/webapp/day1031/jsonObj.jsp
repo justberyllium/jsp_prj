@@ -22,58 +22,12 @@
 </style>
 <script type="text/javascript">
 $(function(){
-	$("#btn").click(function(){
-		sendData();
-	});//click
+	
 });//ready
-
-function sendData() {
-	var name=$("#name").val();
-	var age=$("#age").val();
-	//유효성검증
-	if(name.trim() == ""){
-		alert("이름은 필수입력!!!");
-		$("#name").focus();
-		return;
-	}//end if
-	
-	//서버로 보낼 데이터 생성
-	//QueryString 작성
-	//var param="name="+name+"&age="+age;
-	
-	//2. JSONObject로 작성 ( 이름이 파라메터명이 됩니다 {이름 :값})
-	var param={ name : name, age : age };
-	
-	
-	$.ajax({
-		url:"test_param.jsp",
-		type:"get",
-		data:param,
-		dataType:"json",
-		error:function( xhr ){
-			console.log( xhr.ststus +" 에러 발생");
-		},
-		success:function( jsonObj ){
-			var inter=jsonObj.interests;
-			var msg=jsonObj.msg;
-			
-			$("#output").html(msg+"<br>관심사는"+inter+"입니다");
-			$("#txtOut").val(inter);
-		}
-	});//ajax
-	
-}//sendData
 </script>
 </head>
 <body>
 <div id="wrap">
-	<div id="output" style="height: 80px"></div>
-	<div><input type="text" id="txtOut"/></div>
-	<label>이름</label>
-	<input type="text" name="name" id="name"/>
-	<label>나이</label>
-	<input type="text" name="age" id="age"/>
-	<input type="button" value="전송" class="btn btn-success" id="btn"/>
 </div>
 </body>
 </html>
