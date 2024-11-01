@@ -49,7 +49,8 @@
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.js"></script>
 
 <style type="text/css">
-
+#relyMenu{cursor: pointer;}
+#relyContentDiv{display: none;}
 </style>
 <script type="text/javascript">
 if(${ empty bVO }){
@@ -77,15 +78,15 @@ $(function(){
   });//click
   
   $("#btnList").click(function(){
-	  
-	  var url="../board/board_list.jsp?currentPage=${ param.currentPage }";"
-	  
-	  if(${ not empty param.keyword}){
-		  url+="&field=${param.field}&keyword=${param.keyword}";
-	  }//end if
-	  
-	  location.href=url;
-  });//click
+	    var url="../board/board_list.jsp?currentPage=${ param.currentPage }";
+	    
+	    if(${ not empty param.keyword }){
+	        url += "&field=${param.field}&keyword=${param.keyword}";
+	    }
+	    
+	    location.href=url;
+	});
+
   
   $("#btnUpdate").click(function(){
 	  movePage('u')
@@ -95,7 +96,159 @@ $(function(){
 	  movePage('d')
   });//click
   
+  <c:if test="${ empty userData.id}">
+  $("#btnReplyWriter").click(function(){
+	  if( confirm("로그인 한 사용자만 댓글을 작성할 수 있습니다\n로그인하시겠습니까?"))
+		  location.href="../index.jsp";
+  });
+  </c:if>
+  
+  <c:if test="${ not empty userData.id}">
+  $("#btnReplyWrite").click(function(){
+	  
+	  var content=$("#replyContent").val();
+	  
+	  if(content.trim() == ""){
+		  alert("댓글의 내용은 필수 입력!!");
+		  $("#replyContent").focus();
+		  return;
+	  }//end if
+	  
+	  var param={ content: content, ref_num : ${ bVO.num } }
+	  
+	  $.ajax({
+		  url:"reply_write_process.jsp",
+		  type:"post",
+		  data: param,
+		  dataType:"json",
+		  error:function( xhr ){
+			  console.log( xhr,status );
+			  alert("댓글이 정상적으로 입력되지 못하였습니다.")
+		  },
+		 	success: function( jsonObj ){
+		 		if( jsonObj.result ){
+		 			if(!jsonObj.loginStatus){
+		 				alert("로그인 정보가 존재하지 않습니다");
+		 				return;
+		 			}//end if
+		 			
+		 			var msg="댓글 작성 실패!!";
+		 			if( jsonObj.insertStatus){
+		 				msg="댓글을 작성하였습니다";
+		 				$("#relyMenu").html("열기 (<span title='댓글의 수'>"+rowCnt()+"</span>)");
+		 			}//end if
+		 			alert(msg);
+		 		}//end if
+		 		
+		 		$("#replyContent").val("");
+		 	}
+	  });//ajax
+	  
+  });//click
+  </c:if>
+  $("#relyMenu").click(function(){
+	  chgTxt();
+  });//click
+  
+  $("#relyMenu").html("열기 (<span title='댓글의 수'>"+rowCnt()+"</span>)");
+  
 });//ready
+function rowCnt(){
+	var cnt=0;
+	$.ajax({
+	    url: "replyCnt.jsp",
+	    type: "get", // 수정된 부분
+	    data: { ref_num: ${bVO.num} },
+	    async: false,
+	    dataType: "json",
+	    error: function(xhr) {
+	        console.log(xhr.status);
+	    },
+	    success: function(jsonObj) {
+	        cnt = jsonObj.rowCnt;
+	    }
+	});
+}
+
+function chgTxt() {
+    var txt = $("#relyMenu").text();
+    
+    console.log(txt); // txt의 값을 확인
+    
+    var menuTxt = "열기 (<span title='댓글의 수'>" + rowCnt() + "</span>)";
+    
+    if (txt === "열기") {
+        menuTxt = "닫기";
+        searchReply();
+    }
+    
+    $("#relyMenu").html(menuTxt);
+    $("#relyContentDiv").toggle();
+    
+}//chgTxt
+
+function searchReply(){
+	var param={ ref_num : ${ bVO.num } }
+	$.ajax({
+		url:"reply_list.jsp",
+		type:"get",
+		data:param,
+		dataType:"json",
+		error:function( xhr ){
+			console.log( xhr.status );
+		},
+		success: function( jsonObj ){
+			if( jsonObj.resultFlag ){
+			var outReply="<div id='replyBlock'>"
+			
+			$.each(jsonObj.data, function(ind, jsonTemp){
+				outReply+="<div class='replyInnerBox'>";
+				outReply+="<div>"+ jsonTemp.content+"</div>";
+				outReply+="<div><strong>작성자</strong> : "+ jsonTemp.writer
+				+",<strong>작성일</strong> : "+ jsonTemp.input_date
+				+",<strong>ip</strong> : "+ jsonTemp.ip;
+				if(jsonTemp.writer == "${ userData.id }" ){
+				outReply+="<input type='button' value='삭제' onclick=\"removeReply("+jsonTemp.num
+						+",'"+jsonTemp.writer+"',this)\"class='btn btn-danger btn-sm'/>"	
+				}//end if
+				+"</div>";
+				outReply+="</div>";
+				outReply+="</div>";
+			});//each
+				outReply+="</div>";
+			
+				$("#relyContentDiv").html( outReply );
+			}//end if
+		}
+	});//ajax
+}//searchReply
+
+function removeReply( num, writer, divElement ){
+	
+	if(!confirm("댓글을 삭제하시겠습니까?")){
+		return;
+	}//end if
+	
+	var param={ num:num, writer:writer };
+	
+	$.ajax({
+		url:"reply_remove.jsp",
+		type:"get",
+		data:param,
+		dataType:"json",
+		error:function( xhr ){
+			console.log( xhr.status );
+		},
+		success:function( jsonObj){
+			var msg="댓글이 정상적으로 삭제되지 않았습니다";
+			if( jsonObj.cnt != 0 ){
+				msg="댓글이 정상적으로 삭제되었습니다"
+					$(divElement).parent().parent().remove();
+			}//end if
+			alert( msg );
+		}
+	});//ajax
+}//removeReply
 
 function movePage( flag ) {
 	//<form> 태그에 action을 변경 document.폼이릉.action="변경할action"
@@ -185,7 +338,7 @@ function chkNull(){
 	<td style="width: 80px">ip</td>
 	<td>
 		<c:out value="${bVO.ip }"/>
-		<input type="hidden" name="num" value="${ bVO.num }"/>
+		<input type="hidden" name="num" id="num" value="${ bVO.num }"/>
 		<input type="hidden" name="currentPage" value="${ param.currentPage }"/>
 	</td>
 	</tr>
@@ -200,6 +353,24 @@ function chkNull(){
 	</tr>
 	</table>
 	</form>
+</div>
+<div id="replyWriteDiv">
+<strong>댓글작성</strong>
+<label>내용</label>
+<input type="text" name="replyContent" id="replyContent" style="width: 300px">
+<label>작성자</label>
+<input type="text" name="replyWriter" style="width: 80px"
+value="${ userData.id }" readonly="readonly">
+<input type="button" value="댓글작성" id="btnReplyWrite" class="btn btn-success btn-sm">
+</div>
+<div id="replyReadDiv">
+<div id="relyMenuDiv">
+<span id="relyMenu">열기</span>
+<span id="count"></span>
+
+</div>
+<div id="relyContentDiv"></div>
+
 </div>
 </div>
 </div>
