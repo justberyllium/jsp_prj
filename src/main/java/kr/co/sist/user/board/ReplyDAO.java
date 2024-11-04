@@ -103,7 +103,7 @@ public class ReplyDAO {
 		return list;
 	}//selectReply
 	
-	public int selectCountReply(int ref_num)throws SQLException{
+	public int selectReplyCnt(int ref_num)throws SQLException{
 		int rowCnt=0;
 		
 		Connection con=null;
@@ -116,14 +116,14 @@ public class ReplyDAO {
 			//connection얻기
 			con=dbCon.getConn();
 			//쿼리문 생성객체 얻기
-			StringBuilder selectCountReply=new StringBuilder();
-			selectCountReply
+			StringBuilder selectReply=new StringBuilder();
+			selectReply
 			.append("	select  count(*) cnt	")
 			.append("	from  reply	")
 			.append("	where ref_num=?	")
 			;
 			
-			pstmt=con.prepareStatement(selectCountReply.toString());
+			pstmt=con.prepareStatement(selectReply.toString());
 			
 			pstmt.setInt(1, ref_num);
 						
@@ -143,6 +143,12 @@ public class ReplyDAO {
 		return rowCnt;
 	}//selectReply
 	
+	/**
+	 *댓글이 존재하게 되면 udate로 삭제작업을 변경해야 함
+	 * @param rVO
+	 * @return
+	 * @throws SQLException
+	 */
 	public int deleteReply(ReplyVO rVO)throws SQLException{
 		
 		int rowCnt=0;

@@ -10,7 +10,7 @@ int cnt=0;
 try{
 int ref_num=Integer.parseInt(request.getParameter("ref_num"));
 ReplyDAO rDAO=ReplyDAO.getInstance();
-cnt=rDAO.selectCountReply(ref_num);
+cnt=rDAO.selectReplyCnt(ref_num);
 }catch(Exception e){
 	e.printStackTrace();
 }
