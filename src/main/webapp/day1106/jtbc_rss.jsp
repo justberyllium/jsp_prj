@@ -24,7 +24,7 @@
 
 <style type="text/css">
 a{ font-size: 16px; color: #212529; text-decoration: none;}
-a hover{ font-size: 16px; color: #dfdfdf}
+a:hover{ font-size: 16px; color: #dfdfdf}
 </style>
 <script type="text/javascript">
 $(function(){
